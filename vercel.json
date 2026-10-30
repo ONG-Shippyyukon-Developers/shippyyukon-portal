@@ -20,9 +20,7 @@
       "has": [
         {
           "type": "host",
-          "value": {
-            "pre": "red."
-          }
+          "value": "red.shippiyyukon.org"
         }
       ],
       "destination": {
@@ -34,13 +32,23 @@
       "has": [
         {
           "type": "host",
-          "value": {
-            "pre": "redpanel."
-          }
+          "value": "redpanel.shippiyyukon.org"
         }
       ],
       "destination": {
         "service": "management_web"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "shippiyyukon.org"
+        }
+      ],
+      "destination": {
+        "service": "institutional_landing"
       }
     },
     {
