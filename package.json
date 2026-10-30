@@ -1,0 +1,24 @@
+{
+  "name": "shippiyyukon-portal",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "services/*",
+    "packages/*",
+    "infrastructure"
+  ],
+  "scripts": {
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm run test --workspace=@shippiyyukon/api",
+    "dev:web": "npm run dev --workspace=@shippiyyukon/web",
+    "dev:landing-shippiyyukon": "npm run dev --workspace=@shippiyyukon/landing-shippiyyukon",
+    "dev:landing-red": "npm run dev --workspace=@shippiyyukon/landing-red",
+    "infra:synth": "npm run synth --workspace=@shippiyyukon/infrastructure",
+    "infra:deploy": "npm run deploy --workspace=@shippiyyukon/infrastructure"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0"
+  },
+  "engines": { "node": ">=20" }
+}
