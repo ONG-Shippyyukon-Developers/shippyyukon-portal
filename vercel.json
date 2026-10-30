@@ -1,0 +1,53 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "services": {
+    "landing_red": {
+      "root": "apps/landing-red/",
+      "framework": "vite"
+    },
+    "management_web": {
+      "root": "apps/web/",
+      "framework": "vite"
+    },
+    "institutional_landing": {
+      "root": "apps/landing-shippiyyukon/",
+      "framework": "vite"
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": {
+            "pre": "red."
+          }
+        }
+      ],
+      "destination": {
+        "service": "landing_red"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": {
+            "pre": "redpanel."
+          }
+        }
+      ],
+      "destination": {
+        "service": "management_web"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "destination": {
+        "service": "institutional_landing"
+      }
+    }
+  ]
+}
