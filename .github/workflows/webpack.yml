@@ -24,6 +24,8 @@ jobs:
         run: npm ci
       - name: Typecheck workspaces
         run: npm run typecheck
+      - name: Run API unit and adapter tests
+        run: npm test
       - name: Build Red network landing
         run: npm run build --workspace=@shippiyyukon/landing-red
       - name: Build management panel
