@@ -97,7 +97,7 @@ El panel de gestión debe estar separado del sitio público tanto en autenticaci
 - Las landings institucional y de la Red pueden ser públicas; nunca deben compartir rutas que expongan datos administrativos.
 - La API debe ejecutarse en runtime Node.js (no Edge por defecto mientras use `pg` y librerías Node), cerca de la región de Neon.
 - El frontend no se conecta directamente a Neon. Todas las lecturas y escrituras pasan por API server-side.
-- Preferir proyectos Vercel separados por aplicación en el monorepo cuando no esté confirmada la disponibilidad de Vercel Services. La documentación oficial indica que Services es Private Beta y requiere acceso; no se asumirá que está habilitado en la cuenta.
+- En este proyecto ya se verificó acceso operativo a Vercel Services: el proyecto está configurado con framework `services` y el Preview de la rama `feat/vercel-host-routing` quedó `READY` con su `vercel.json`. Por tanto, podemos continuar con esta topología, pero la disponibilidad del build no equivale a validar el enrutamiento de cada host ni la protección del panel. Antes de producción se requieren pruebas HTTP por dominio y revisión de Deployment Protection. La documentación de Vercel indica que Services permanece en Private Beta y requiere acceso concedido; ese acceso está confirmado para este proyecto.
 - No cambiar dominios, DNS, SSO o Deployment Protection sin aprobación explícita y pruebas de acceso.
 
 El backend actual usa tipos de eventos AWS Lambda/API Gateway. Debe adaptarse a contratos HTTP estándar de Vercel sin acoplar la lógica de dominio a eventos de un proveedor.
