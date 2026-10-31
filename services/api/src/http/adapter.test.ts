@@ -16,7 +16,7 @@ function result(statusCode: number, body: unknown): APIGatewayProxyStructuredRes
 describe("Vercel HTTP adapter", () => {
   it("adapts a GET request and preserves the query string for the existing handler", async () => {
     const listConsejeros = vi.fn(async (event: APIGatewayProxyEventV2) =>
-      result(200, { query: event.queryStringParameters })
+      result(200, { ok: true, data: { query: event.queryStringParameters } })
     );
     const handler = createHttpHandler({
       health: async () => result(200, { status: "ok" }),
