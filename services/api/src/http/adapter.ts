@@ -90,7 +90,7 @@ export function createHttpHandler(handlers: HttpApiHandlers) {
 
     try {
       let body: string | undefined;
-      if (method !== "GET" && method !== "HEAD") {
+      if (method !== "GET") {
         body = await request.text();
       }
 
