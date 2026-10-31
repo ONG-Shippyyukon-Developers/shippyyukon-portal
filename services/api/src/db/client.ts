@@ -1,19 +1,11 @@
 import { Pool, PoolClient } from "pg";
+import { databasePoolConfig } from "./config";
 
 /**
- * Conexión a Aurora PostgreSQL (DAT §4/§9). En producción, el host/credenciales
- * se inyectan vía Secrets Manager + variables de entorno de la Lambda
- * (ver infrastructure/lib/constructs/data-construct.ts), nunca hardcodeados.
+ * PostgreSQL connection is configured exclusively on the server via DATABASE_URL.
+ * The same driver/configuration works with Neon now and Aurora PostgreSQL later.
  */
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT ?? 5432),
-  database: process.env.DB_NAME ?? "shippiyyukon",
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === "false" ? undefined : { rejectUnauthorized: true },
-  max: 5, // conservador para Lambda: evita agotar conexiones de Aurora Serverless v2
-});
+const pool = new Pool(databasePoolConfig());
 
 export interface TenantContext {
   /** Rol de plataforma del usuario autenticado (RawData §11 RBAC) */
