@@ -9,8 +9,13 @@ on:
 permissions:
   contents: read
 
+concurrency:
+  group: validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate:
+  build-and-test:
+    name: Typecheck and build
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -30,5 +35,19 @@ jobs:
         run: npm run build --workspace=@shippiyyukon/web
       - name: Build institutional landing
         run: npm run build --workspace=@shippiyyukon/landing-shippiyyukon
+
+  dependency-audit:
+    name: Dependency security audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24.x
+          cache: npm
+      - name: Install locked dependencies
+        run: npm ci
       - name: Audit high and critical vulnerabilities
         run: npm audit --audit-level=high
