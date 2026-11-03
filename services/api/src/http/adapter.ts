@@ -11,6 +11,7 @@ export interface HttpApiHandlers {
   health: LegacyHandler | (() => Promise<APIGatewayProxyStructuredResultV2>);
   listConsejeros: LegacyHandler;
   createConsejero?: LegacyHandler;
+  approveConsejero?: LegacyHandler;
 }
 
 function jsonError(status: number, code: string, message: string, headers?: HeadersInit): Response {
@@ -20,7 +21,11 @@ function jsonError(status: number, code: string, message: string, headers?: Head
   );
 }
 
-function toApiGatewayEvent(request: Request, url: URL): APIGatewayProxyEventV2 {
+function toApiGatewayEvent(
+  request: Request,
+  url: URL,
+  pathParameters?: Record<string, string>
+): APIGatewayProxyEventV2 {
   const query: Record<string, string> = {};
   url.searchParams.forEach((value, key) => {
     // API Gateway v2 exposes the last value for repeated query keys in this field.
@@ -34,6 +39,7 @@ function toApiGatewayEvent(request: Request, url: URL): APIGatewayProxyEventV2 {
     rawQueryString: url.searchParams.toString(),
     headers: Object.fromEntries(request.headers.entries()),
     queryStringParameters: Object.keys(query).length ? query : undefined,
+    pathParameters,
     body: undefined,
     isBase64Encoded: false,
   } as APIGatewayProxyEventV2;
@@ -60,10 +66,15 @@ export function createHttpHandler(handlers: HttpApiHandlers) {
   return async function handle(request: Request): Promise<Response> {
     const url = new URL(request.url);
     const method = request.method.toUpperCase();
+    const approvalMatch = url.pathname.match(/^\/api\/consejeros\/([^/]+)\/approve$/);
 
     let selected: LegacyHandler | (() => Promise<APIGatewayProxyStructuredResultV2>) | undefined;
+    let pathParameters: Record<string, string> | undefined;
+
     if (url.pathname === "/api/health" && method === "GET") {
       selected = handlers.health;
+    } else if (url.pathname === "/api/health") {
+      return jsonError(405, "METHOD_NOT_ALLOWED", "Método no permitido", { allow: "GET" });
     } else if (url.pathname === "/api/consejeros" && method === "GET") {
       selected = handlers.listConsejeros;
     } else if (
@@ -72,18 +83,17 @@ export function createHttpHandler(handlers: HttpApiHandlers) {
       handlers.createConsejero
     ) {
       selected = handlers.createConsejero;
-    } else if (
-      url.pathname === "/api/health" ||
-      url.pathname === "/api/consejeros"
-    ) {
-      const allow = url.pathname === "/api/health"
-        ? "GET"
-        : handlers.createConsejero
-          ? "GET, POST"
-          : "GET";
-      return jsonError(405, "METHOD_NOT_ALLOWED", "Método no permitido", {
-        allow,
-      });
+    } else if (url.pathname === "/api/consejeros") {
+      const allow = handlers.createConsejero ? "GET, POST" : "GET";
+      return jsonError(405, "METHOD_NOT_ALLOWED", "Método no permitido", { allow });
+    } else if (approvalMatch && method === "POST" && handlers.approveConsejero) {
+      selected = handlers.approveConsejero;
+      pathParameters = { id: approvalMatch[1] };
+    } else if (approvalMatch) {
+      if (method !== "POST") {
+        return jsonError(405, "METHOD_NOT_ALLOWED", "Método no permitido", { allow: "POST" });
+      }
+      return jsonError(404, "NOT_FOUND", "Ruta no encontrada");
     } else {
       return jsonError(404, "NOT_FOUND", "Ruta no encontrada");
     }
@@ -95,7 +105,7 @@ export function createHttpHandler(handlers: HttpApiHandlers) {
       }
 
       const event = {
-        ...toApiGatewayEvent(request, url),
+        ...toApiGatewayEvent(request, url, pathParameters),
         body,
       } as APIGatewayProxyEventV2;
       const result = await selected(event);
