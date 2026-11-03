@@ -20,6 +20,27 @@ describe("validateConsejeroInput", () => {
     expect(() => validateConsejeroInput(base)).not.toThrow();
   });
 
+  it("rechaza una vía de ingreso que no pertenece al enum", () => {
+    expect(() =>
+      validateConsejeroInput({
+        ...base,
+        viaIngreso: "OTRA_VIA" as ViaIngreso,
+      })
+    ).toThrow(ValidationError);
+  });
+
+  it("rechaza fechas que no cumplen el formato ISO YYYY-MM-DD", () => {
+    expect(() =>
+      validateConsejeroInput({ ...base, fechaIngreso: "01/03/2022" })
+    ).toThrow(ValidationError);
+  });
+
+  it("rechaza fechas ISO con días inexistentes", () => {
+    expect(() =>
+      validateConsejeroInput({ ...base, fechaIngreso: "2022-02-30" })
+    ).toThrow(ValidationError);
+  });
+
   it("HU-A2 — exige subEstadoSuplencia cuando el rol es CONSEJERO_SUPLENTE", () => {
     expect(() =>
       validateConsejeroInput({ ...base, rol: RolConsejero.CONSEJERO_SUPLENTE })

@@ -2,6 +2,7 @@ import {
   ConsejeroInput,
   RolConsejero,
   SubEstadoSuplencia,
+  ViaIngreso,
 } from "@shippiyyukon/shared";
 
 export class ValidationError extends Error {
@@ -9,6 +10,22 @@ export class ValidationError extends Error {
     super(issues.join("; "));
     this.name = "ValidationError";
   }
+}
+
+function esFechaISOValida(fecha: string): boolean {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return false;
+
+  const [anio, mes, dia] = fecha.split("-").map(Number);
+
+  const comprobacion = new Date(0);
+  comprobacion.setUTCHours(0, 0, 0, 0);
+  comprobacion.setUTCFullYear(anio, mes - 1, dia);
+
+  return (
+    comprobacion.getUTCFullYear() === anio &&
+    comprobacion.getUTCMonth() === mes - 1 &&
+    comprobacion.getUTCDate() === dia
+  );
 }
 
 /**
@@ -48,11 +65,13 @@ export function validateConsejeroInput(input: ConsejeroInput): void {
   if (!input.numeroResolucion?.trim()) {
     issues.push("numeroResolucion es obligatorio (HU-A3)");
   }
-  if (!input.fechaIngreso || Number.isNaN(Date.parse(input.fechaIngreso))) {
-    issues.push("fechaIngreso debe ser una fecha ISO válida (HU-A3)");
+  if (!esFechaISOValida(input.fechaIngreso)) {
+    issues.push(
+      "fechaIngreso debe ser una fecha ISO válida (YYYY-MM-DD) (HU-A3)"
+    );
   }
-  if (!input.viaIngreso) {
-    issues.push("viaIngreso es obligatorio (concurso de oposición o designación directa — HU-A3)");
+  if (!Object.values(ViaIngreso).includes(input.viaIngreso)) {
+    issues.push("viaIngreso debe ser un valor válido del enum ViaIngreso (HU-A3)");
   }
 
   if (!input.estado?.trim()) issues.push("estado es obligatorio");
