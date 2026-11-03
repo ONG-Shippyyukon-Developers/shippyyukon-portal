@@ -31,7 +31,7 @@ describe("Vercel API service entrypoint", () => {
       new Request("https://redpanel.shippiyyukon.org/api/consejeros")
     );
 
-    expect(response.status).toBe(503);
+    expect(response.status).toBe(401);
     await expect(response.json()).resolves.toMatchObject({
       ok: false,
       error: { code: "AUTH_ERROR" },
