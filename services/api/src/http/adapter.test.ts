@@ -105,8 +105,7 @@ describe("Vercel HTTP adapter", () => {
 
     expect(response.status).toBe(201);
     await expect(response.json()).resolves.toEqual({
-      ok: true,
-      data: { body: JSON.stringify({ nombres: "Test" }) },
+      body: JSON.stringify({ nombres: "Test" }),
     });
   });
 
@@ -130,11 +129,8 @@ describe("Vercel HTTP adapter", () => {
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toEqual({
-      ok: true,
-      data: {
-        id: "abc-123",
-        body: JSON.stringify({ decision: "APROBADO" }),
-      },
+      id: "abc-123",
+      body: JSON.stringify({ decision: "APROBADO" }),
     });
     expect(approveConsejero).toHaveBeenCalledOnce();
   });
