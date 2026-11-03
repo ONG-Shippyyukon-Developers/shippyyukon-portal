@@ -8,7 +8,7 @@ afterEach(() => {
 
 describe("authenticate", () => {
   it("rejects requests without a bearer token", async () => {
-    await expect(authenticate({ headers: {} } as APIGatewayProxyEventV2))
+    await expect(authenticate({ headers: {} } as unknown as APIGatewayProxyEventV2))
       .rejects.toMatchObject({ statusCode: 401 });
   });
 
