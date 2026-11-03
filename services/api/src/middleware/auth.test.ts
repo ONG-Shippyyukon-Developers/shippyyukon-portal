@@ -19,7 +19,7 @@ describe("authenticate", () => {
     await expect(
       authenticate({
         headers: { authorization: "Bearer untrusted-token" },
-      } as APIGatewayProxyEventV2)
+      } as unknown as APIGatewayProxyEventV2)
     ).rejects.toMatchObject({
       name: "AuthError",
       statusCode: 503,
