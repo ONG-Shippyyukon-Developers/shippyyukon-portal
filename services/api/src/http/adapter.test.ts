@@ -84,4 +84,58 @@ describe("Vercel HTTP adapter", () => {
     expect(response.headers.get("allow")).toContain("GET");
     expect(listConsejeros).not.toHaveBeenCalled();
   });
+
+  it("passes the JSON request body to the create handler", async () => {
+    const createConsejero = vi.fn(async (event: APIGatewayProxyEventV2) =>
+      result(201, { body: event.body })
+    );
+    const handler = createHttpHandler({
+      health: async () => result(200, { status: "ok" }),
+      listConsejeros: async () => result(200, []),
+      createConsejero,
+    });
+
+    const response = await handler(
+      new Request("https://redpanel.shippiyyukon.org/api/consejeros", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ nombres: "Test" }),
+      })
+    );
+
+    expect(response.status).toBe(201);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      data: { body: JSON.stringify({ nombres: "Test" }) },
+    });
+  });
+
+  it("routes POST approval requests with the consejero id as a path parameter", async () => {
+    const approveConsejero = vi.fn(async (event: APIGatewayProxyEventV2) =>
+      result(200, { id: event.pathParameters?.id, body: event.body })
+    );
+    const handler = createHttpHandler({
+      health: async () => result(200, { status: "ok" }),
+      listConsejeros: async () => result(200, []),
+      approveConsejero,
+    });
+
+    const response = await handler(
+      new Request("https://redpanel.shippiyyukon.org/api/consejeros/abc-123/approve", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({ decision: "APROBADO" }),
+      })
+    );
+
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toEqual({
+      ok: true,
+      data: {
+        id: "abc-123",
+        body: JSON.stringify({ decision: "APROBADO" }),
+      },
+    });
+    expect(approveConsejero).toHaveBeenCalledOnce();
+  });
 });
