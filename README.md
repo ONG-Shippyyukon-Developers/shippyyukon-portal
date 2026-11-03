@@ -60,7 +60,7 @@ completar la integración de passkeys en el frontend, confirmar la lista real
 de los 25 municipios piloto, y añadir CloudTrail/GuardDuty/Macie (HU-00.4,
 todavía no está en el stack de CDK).
 
-La cuenta AWS se gestiona desde `shippi.dev@gmail.com` como usuario **root**:
+La cuenta AWS se gestiona desde `shippyy.dev@gmail.com` como usuario **root**:
 actívale MFA desde el primer acceso y no la uses para el día a día — crea
 usuarios administrativos vía IAM Identity Center (ver DAT, sección de cuenta AWS).
 
