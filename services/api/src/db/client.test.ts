@@ -8,6 +8,6 @@ describe("database client initialization", () => {
   it("does not require DATABASE_URL merely to import the API module", async () => {
     vi.stubEnv("DATABASE_URL", "");
 
-    await expect(import("./client")).resolves.toHaveProperty("withTenantContext");
+    await expect(import("./client.js")).resolves.toHaveProperty("withTenantContext");
   });
 });
