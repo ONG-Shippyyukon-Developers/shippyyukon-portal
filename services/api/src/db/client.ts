@@ -1,19 +1,20 @@
-import { Pool, PoolClient } from "pg";
+import { Pool } from "pg";
+import type { PoolClient } from "pg";
+import { databasePoolConfig } from "./config";
 
 /**
- * Conexión a Aurora PostgreSQL (DAT §4/§9). En producción, el host/credenciales
- * se inyectan vía Secrets Manager + variables de entorno de la Lambda
- * (ver infrastructure/lib/constructs/data-construct.ts), nunca hardcodeados.
+ * Lazy server-side PostgreSQL pool. This keeps non-database endpoints (such as
+ * /api/health) available while DATABASE_URL is not configured. Database
+ * operations fail closed when configuration is missing.
  */
-const pool = new Pool({
-  host: process.env.DB_HOST,
-  port: Number(process.env.DB_PORT ?? 5432),
-  database: process.env.DB_NAME ?? "shippiyyukon",
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: process.env.DB_SSL === "false" ? undefined : { rejectUnauthorized: true },
-  max: 5, // conservador para Lambda: evita agotar conexiones de Aurora Serverless v2
-});
+let pool: Pool | undefined;
+
+function getPool(): Pool {
+  if (!pool) {
+    pool = new Pool(databasePoolConfig());
+  }
+  return pool;
+}
 
 export interface TenantContext {
   /** Rol de plataforma del usuario autenticado (RawData §11 RBAC) */
@@ -25,15 +26,13 @@ export interface TenantContext {
 /**
  * Ejecuta `fn` dentro de una transacción con el contexto de tenant aplicado
  * vía `SET LOCAL`, que las políticas de Row-Level Security de schema.sql leen
- * con `current_setting(...)`. Este es el punto único por el que CUALQUIER
- * consulta a `consejeros` pasa — así HU-A7 y HU-00.5 (RBAC) se cumplen a nivel
- * de base de datos, no solo en la lógica de la aplicación.
+ * con `current_setting(...)`. El contexto proviene de claims ya verificados.
  */
 export async function withTenantContext<T>(
   ctx: TenantContext,
   fn: (client: PoolClient) => Promise<T>
 ): Promise<T> {
-  const client = await pool.connect();
+  const client = await getPool().connect();
   try {
     await client.query("BEGIN");
     await client.query("SELECT set_config('app.rol_plataforma', $1, true)", [
@@ -68,5 +67,3 @@ export async function siguienteCorrelativo(
   );
   return rows[0].siguiente;
 }
-
-export { pool };

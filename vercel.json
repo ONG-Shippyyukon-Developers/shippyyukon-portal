@@ -12,9 +12,32 @@
     "institutional_landing": {
       "root": "apps/landing-shippiyyukon/",
       "framework": "vite"
+    },
+    "api_backend": {
+      "root": "services/api/",
+      "framework": "node",
+      "entrypoint": "src/server.ts"
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": "redpanel.shippiyyukon.org"
+        }
+      ],
+      "destination": {
+        "service": "api_backend"
+      }
+    },
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api_backend"
+      }
+    },
     {
       "source": "/(.*)",
       "has": [
