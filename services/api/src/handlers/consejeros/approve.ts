@@ -9,6 +9,13 @@ interface AprobarBody {
   decision: "APROBADO" | "RECHAZADO";
 }
 
+class ApprovalConflictError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ApprovalConflictError";
+  }
+}
+
 /**
  * POST /consejeros/{id}/approve — HU-A6 ("Carga Autorizada").
  * Solo roles nacionales (Shippiyyukon/CAIRUS) pueden aprobar o rechazar.
@@ -34,23 +41,34 @@ export async function handler(
       async (client) => {
         const { rows: pendientes } = await client.query(
           `SELECT id, nombres, apellidos, estado, municipio, genero, estado_registro
-             FROM consejeros WHERE id = $1`,
+             FROM consejeros
+            WHERE id = $1
+            FOR UPDATE`,
           [id]
         );
         const consejero = pendientes[0];
         if (!consejero) return null;
         if (consejero.estado_registro !== "PENDIENTE") {
-          throw new Error(`El registro ya está en estado ${consejero.estado_registro}`);
+          throw new ApprovalConflictError(
+            `El registro ya está en estado ${consejero.estado_registro}`
+          );
         }
 
         if (decision === "RECHAZADO") {
           const { rows } = await client.query(
             `UPDATE consejeros
-               SET estado_registro = 'RECHAZADO', aprobado_por = $2
-             WHERE id = $1
+                SET estado_registro = 'RECHAZADO',
+                    aprobado_por = $2
+              WHERE id = $1
+                AND estado_registro = 'PENDIENTE'
              RETURNING id, estado_registro`,
             [id, user.sub]
           );
+          if (rows.length !== 1) {
+            throw new ApprovalConflictError(
+              "El registro ya no está pendiente de aprobación"
+            );
+          }
           return rows[0];
         }
 
@@ -67,14 +85,20 @@ export async function handler(
 
         const { rows } = await client.query(
           `UPDATE consejeros
-             SET estado_registro = 'APROBADO',
-                 codigo_unico = $2,
-                 aprobado_por = $3,
-                 fecha_aprobacion = now()
-           WHERE id = $1
+              SET estado_registro = 'APROBADO',
+                  codigo_unico = $2,
+                  aprobado_por = $3,
+                  fecha_aprobacion = now()
+            WHERE id = $1
+              AND estado_registro = 'PENDIENTE'
            RETURNING id, estado_registro, codigo_unico, fecha_aprobacion`,
           [id, codigoUnico, user.sub]
         );
+        if (rows.length !== 1) {
+          throw new ApprovalConflictError(
+            "El registro ya no está pendiente de aprobación"
+          );
+        }
         return rows[0];
       }
     );
@@ -83,7 +107,14 @@ export async function handler(
     return ok(resultado);
   } catch (err) {
     if (err instanceof AuthError) return fail(err.message, err.statusCode, "AUTH_ERROR");
-    console.error(err);
-    return fail((err as Error).message ?? "Error interno al aprobar el registro", 500);
+    if (err instanceof ApprovalConflictError) {
+      return fail(err.message, 409, "CONFLICT");
+    }
+    console.error("Error interno al procesar aprobación:", err);
+    return fail(
+      "Error interno al procesar la decisión de aprobación",
+      500,
+      "INTERNAL_ERROR"
+    );
   }
 }
