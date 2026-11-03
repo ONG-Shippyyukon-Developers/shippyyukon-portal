@@ -1,19 +1,32 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
-import api from "../../api/index";
+import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+import type { AddressInfo } from "node:net";
+import server from "../server";
 
-afterEach(() => {
+let baseUrl: string;
+
+beforeAll(async () => {
+  vi.stubEnv("DATABASE_URL", "");
+  vi.stubEnv("COGNITO_USER_POOL_ID", "");
+  vi.stubEnv("COGNITO_CLIENT_ID", "");
+
+  await new Promise<void>((resolve) => {
+    server.listen(0, "127.0.0.1", resolve);
+  });
+
+  const address = server.address() as AddressInfo;
+  baseUrl = `http://127.0.0.1:${address.port}`;
+});
+
+afterAll(async () => {
+  await new Promise<void>((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  });
   vi.unstubAllEnvs();
 });
 
-describe("Vercel API service entrypoint", () => {
-  it("serves a public health check without database or identity-provider configuration", async () => {
-    vi.stubEnv("DATABASE_URL", "");
-    vi.stubEnv("COGNITO_USER_POOL_ID", "");
-    vi.stubEnv("COGNITO_CLIENT_ID", "");
-
-    const response = await api.fetch(
-      new Request("https://redpanel.shippiyyukon.org/api/health")
-    );
+describe("Vercel Node.js API service", () => {
+  it("serves the public health check over a real HTTP server", async () => {
+    const response = await fetch(`${baseUrl}/api/health`);
 
     expect(response.status).toBe(200);
     await expect(response.json()).resolves.toMatchObject({
@@ -22,14 +35,8 @@ describe("Vercel API service entrypoint", () => {
     });
   });
 
-  it("denies protected operations when the identity provider is not configured", async () => {
-    vi.stubEnv("DATABASE_URL", "");
-    vi.stubEnv("COGNITO_USER_POOL_ID", "");
-    vi.stubEnv("COGNITO_CLIENT_ID", "");
-
-    const response = await api.fetch(
-      new Request("https://redpanel.shippiyyukon.org/api/consejeros")
-    );
+  it("rejects protected consejero routes without an application bearer token", async () => {
+    const response = await fetch(`${baseUrl}/api/consejeros`);
 
     expect(response.status).toBe(401);
     await expect(response.json()).resolves.toMatchObject({
