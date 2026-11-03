@@ -14,7 +14,9 @@
       "framework": "vite"
     },
     "api_backend": {
-      "root": "services/api/"
+      "root": "services/api/",
+      "framework": "node",
+      "entrypoint": "src/server.ts"
     }
   },
   "rewrites": [
