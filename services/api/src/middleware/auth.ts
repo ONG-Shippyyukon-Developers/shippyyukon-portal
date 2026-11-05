@@ -1,19 +1,15 @@
 import { CognitoJwtVerifier } from "aws-jwt-verify";
-import { APIGatewayProxyEventV2 } from "aws-lambda";
+import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { RolPlataforma } from "@shippiyyukon/shared";
 
 /**
- * HU-00.2 — verificación de tokens emitidos por el Amazon Cognito User Pool
- * (configurado en infrastructure/lib/constructs/auth-construct.ts, con MFA y
- * passkeys/WebAuthn habilitados). No verifica contraseñas ni passkeys aquí:
- * eso lo resuelve Cognito antes de emitir el token; esta función solo valida
- * la firma/expiración del JWT y extrae los claims de rol y municipio.
+ * Cognito remains a future identity-provider integration for this MVP.
+ * Create the verifier lazily so public health checks can start without AWS
+ * configuration. Protected routes fail closed until valid provider settings
+ * are supplied; this does not implement WebAuthn or user provisioning.
  */
-const verifier = CognitoJwtVerifier.create({
-  userPoolId: process.env.COGNITO_USER_POOL_ID ?? "",
-  tokenUse: "access",
-  clientId: process.env.COGNITO_CLIENT_ID ?? "",
-});
+type JwtVerifier = ReturnType<typeof CognitoJwtVerifier.create>;
+let verifier: JwtVerifier | undefined;
 
 export interface AuthenticatedUser {
   sub: string;
@@ -22,10 +18,36 @@ export interface AuthenticatedUser {
 }
 
 export class AuthError extends Error {
-  constructor(message: string, public readonly statusCode: 401 | 403 = 401) {
+  constructor(
+    message: string,
+    public readonly statusCode: 401 | 403 | 503 = 401
+  ) {
     super(message);
     this.name = "AuthError";
   }
+}
+
+function getVerifier(): JwtVerifier {
+  const userPoolId = process.env.COGNITO_USER_POOL_ID?.trim();
+  const clientId = process.env.COGNITO_CLIENT_ID?.trim();
+
+  if (!userPoolId || !clientId) {
+    throw new AuthError("El proveedor de autenticación no está configurado", 503);
+  }
+
+  if (!verifier) {
+    try {
+      verifier = CognitoJwtVerifier.create({
+        userPoolId,
+        tokenUse: "access",
+        clientId,
+      });
+    } catch {
+      throw new AuthError("La configuración de autenticación no es válida", 503);
+    }
+  }
+
+  return verifier;
 }
 
 export async function authenticate(
@@ -36,16 +58,15 @@ export async function authenticate(
     throw new AuthError("Falta el header Authorization: Bearer <token>");
   }
   const token = header.slice("Bearer ".length);
+  const jwtVerifier = getVerifier();
 
   let payload;
   try {
-    payload = await verifier.verify(token);
+    payload = await jwtVerifier.verify(token);
   } catch {
     throw new AuthError("Token inválido o expirado");
   }
 
-  // Custom attributes definidos en el User Pool (auth-construct.ts):
-  // custom:rol_plataforma y custom:municipio.
   const rolPlataforma = payload["custom:rol_plataforma"] as RolPlataforma | undefined;
   if (!rolPlataforma || !Object.values(RolPlataforma).includes(rolPlataforma)) {
     throw new AuthError("El token no tiene un rol de plataforma válido", 403);
