@@ -1,7 +1,7 @@
-import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
-import { ApiResult } from "@shippiyyukon/shared";
+import type { ApiResult } from "@shippiyyukon/shared";
+import type { HttpResponse } from "../http/types";
 
-export function ok<T>(data: T, statusCode = 200): APIGatewayProxyStructuredResultV2 {
+export function ok<T>(data: T, statusCode = 200): HttpResponse {
   const body: ApiResult<T> = { ok: true, data };
   return {
     statusCode,
@@ -14,7 +14,7 @@ export function fail(
   message: string,
   statusCode = 400,
   code = "BAD_REQUEST"
-): APIGatewayProxyStructuredResultV2 {
+): HttpResponse {
   const body: ApiResult<never> = { ok: false, error: { code, message } };
   return {
     statusCode,

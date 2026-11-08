@@ -1,32 +1,32 @@
-import { ApiResult } from "@shippiyyukon/shared";
+import type { ApiResult } from "@shippiyyukon/shared";
+import { authClient } from "../auth/neonAuth";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ?? "http://localhost:3000";
+const API_ORIGIN = import.meta.env.VITE_API_BASE_URL ?? "";
 
-/**
- * El token real lo entrega el SDK de Amplify/Cognito tras el login con
- * passkey (ver auth/AuthContext.tsx — stub pendiente de integrar el SDK).
- */
-function getAccessToken(): string | null {
-  return sessionStorage.getItem("shippiyyukon_access_token");
+async function getAccessToken(): Promise<string | null> {
+  if (!authClient) return null;
+  const result = await authClient.getSession();
+  return result.data?.session?.token ?? null;
 }
 
 export async function apiRequest<T>(
   path: string,
   options: { method?: "GET" | "POST"; body?: unknown } = {}
 ): Promise<T> {
-  const token = getAccessToken();
-  const res = await fetch(`${API_BASE_URL}${path}`, {
+  const token = await getAccessToken();
+  const apiPath = path.startsWith("/") ? path : `/${path}`;
+  const apiBase = `${API_ORIGIN.replace(/\/$/, "")}/api`;
+  const res = await fetch(`${apiBase}${apiPath}`, {
     method: options.method ?? "GET",
     headers: {
       "content-type": "application/json",
       ...(token ? { authorization: `Bearer ${token}` } : {}),
     },
     body: options.body ? JSON.stringify(options.body) : undefined,
+    cache: "no-store",
   });
 
   const payload = (await res.json()) as ApiResult<T>;
-  if (!payload.ok) {
-    throw new Error(payload.error?.message ?? `Error ${res.status}`);
-  }
+  if (!payload.ok) throw new Error(payload.error?.message ?? `Error ${res.status}`);
   return payload.data as T;
 }

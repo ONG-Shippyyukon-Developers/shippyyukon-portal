@@ -1,13 +1,13 @@
 # Mapa Backlog → Código
 
-Estado al 24/10/2026. Alcance de este starter: **Épica 0 + Épica A** (ver Backlog, "Enfoque Actual"). Épicas B, C y C2 no están construidas todavía — siguen documentadas en el Backlog para las fases de expansión.
+Documento histórico de mapeo. La arquitectura activa y el alcance vigente se rigen por el MVP Final del 4/11/2026: **Vercel + Better Auth/Passkeys + Neon PostgreSQL + RBAC/alcance + RLS**. Las referencias a AWS/Cognito/Aurora describen una propuesta anterior y no autorizan cambios de infraestructura. Épicas B, C y C2 siguen fuera de alcance.
 
 ## Épica 0 — Infraestructura y Seguridad Base
 
 | Historia | Estado | Dónde |
 |---|---|---|
 | HU-00.1 Provisión de cuenta y ambientes AWS | 🟡 Definido en código, no desplegado | `infrastructure/bin/app.ts` (`envName` dev/staging/prod) |
-| HU-00.2 Cognito con passkeys | 🟡 User Pool completo; passkey/WebAuthn requiere verificación manual al desplegar (ver TODO en el archivo) | `infrastructure/lib/constructs/auth-construct.ts` |
+| HU-00.2 Identidad Better Auth/Passkeys | 🟡 JWT Better Auth y resolución Neon conectados en la API local; cliente/passkey del panel y configuración del proveedor pendientes | `services/api/src/middleware/auth.ts`, `apps/web/src/auth/AuthContext.tsx` |
 | HU-00.3 Llaves KMS por municipio | ✅ Una CMK por municipio en `municipiosPiloto` | `infrastructure/lib/constructs/data-construct.ts` |
 | HU-00.4 Logging y auditoría | 🔴 No implementado en este starter (CloudTrail/GuardDuty/Macie no están en el stack) | Pendiente — próxima iteración de infra |
 | HU-00.5 RBAC por rol | ✅ Matriz de permisos + alcance territorial | `services/api/src/middleware/rbac.ts` |
@@ -22,7 +22,7 @@ Estado al 24/10/2026. Alcance de este starter: **Épica 0 + Épica A** (ver Back
 | HU-A4 Años de servicio calculados | ✅ función pura, no expuesta aún por un endpoint GET individual | `domain/consejero.ts#calcularAniosServicio` |
 | HU-A5 Código único de consejero | ✅ sin dígitos de cédula (Riesgo 5) | `domain/codeGenerator.ts`, con pruebas en `codeGenerator.test.ts` |
 | HU-A6 Flujo de aprobación | ✅ | `handlers/consejeros/approve.ts` |
-| HU-A7 Listado con alcance por rol | ✅ alcance aplicado vía Row-Level Security | `handlers/consejeros/list.ts`, `ListaConsejeros.tsx`, políticas RLS en `db/schema.sql` |
+| HU-A7 Listado con alcance por rol | 🟡 Filtros por `territorio_id` y contexto RLS conectados; falta validar con rol runtime mínimo en Neon | `services/api/src/handlers/consejeros/list-handler.ts`, `services/api/src/db/client.ts` |
 
 ## Épicas B, C, C2 — no construidas
 
@@ -36,9 +36,11 @@ Documentadas en el Backlog; requieren, antes de empezar, la validación de Shipp
 | `red.shippiyyukon.com` | `apps/landing-red` | ✅ landing con CTA al registro |
 | `redpanel.shippiyyukon.com` | `apps/web` | ✅ panel con registro gamificado (wizard) + listado |
 
-## Deuda técnica conocida (léela antes de ir a producción)
+## Estado y deuda técnica vigente
 
-- **Aislamiento por municipio:** el starter usa Row-Level Security (lógico) + una CMK por municipio (criptográfico a nivel de infraestructura), pero **no** cifra todavía cada fila con la CMK de su propio municipio a nivel de aplicación — eso es trabajo de la Épica B (fotografías/datos NNA), que aún no se construye.
-- **Passkeys:** el User Pool de Cognito está configurado para soportarlos, pero la integración del flujo WebAuthn en el frontend (`apps/web/src/auth/AuthContext.tsx`) es un stub — falta conectar el SDK real.
-- **Municipios piloto:** `infrastructure/cdk.json` trae 5 municipios de ejemplo. RawData §12 pregunta 6 (lista real de los 25) sigue abierta.
-- **CloudTrail/GuardDuty/Macie (HU-00.4):** no están en el stack de CDK todavía.
+- **Better Auth/Passkeys:** la API verifica JWT firmado mediante `AUTH_URL` + `AUTH_JWKS_URL` y resuelve solo `sub`; el proveedor debe habilitar su plugin JWT y el panel aún no integra passkeys.
+- **Neon:** repositorio de asignaciones y contexto `SET LOCAL` implementados; el cliente API rechaza roles propietarios, administrativos o con `BYPASSRLS`. Falta provisionar y verificar el rol runtime.
+- **RLS:** habilitada y forzada en las tablas sensibles; aún no se ha probado con el rol runtime ni con pruebas negativas de acceso cruzado.
+- **Territorio:** el catálogo actual es mockup de 5 × 3 y no representa geografía oficial.
+- **Vercel:** Preview/Development son los entornos de trabajo; Production no está autorizada por esta fase.
+- **AWS:** infraestructura histórica congelada para el MVP. No aprovisionar ni modificar AWS/CDK/KMS/S3 sin autorización expresa.

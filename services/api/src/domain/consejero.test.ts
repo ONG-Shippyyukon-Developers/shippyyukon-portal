@@ -9,13 +9,33 @@ const base: ConsejeroInput = {
   numeroResolucion: "RES-2026-014",
   fechaIngreso: "2022-03-01",
   viaIngreso: ViaIngreso.CONCURSO_OPOSICION,
-  estado: "Anzoátegui",
-  municipio: "Cantaura",
+  estado: "Estado 1",
+  municipio: "Municipio A",
   genero: "F",
   cedulaUltimos2: "45",
 };
 
 describe("validateConsejeroInput", () => {
+  it("acepta una relación territorial válida del catálogo", () => {
+    expect(() =>
+      validateConsejeroInput({
+        ...base,
+        estado: "Estado 1",
+        municipio: "Municipio A",
+      })
+    ).not.toThrow();
+  });
+
+  it("rechaza una relación territorial inválida", () => {
+    expect(() =>
+      validateConsejeroInput({
+        ...base,
+        estado: "Estado 1",
+        municipio: "Municipio inexistente",
+      })
+    ).toThrow(ValidationError);
+  });
+
   it("acepta un registro completo y válido", () => {
     expect(() => validateConsejeroInput(base)).not.toThrow();
   });

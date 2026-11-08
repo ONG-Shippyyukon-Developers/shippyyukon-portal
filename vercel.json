@@ -7,7 +7,17 @@
     },
     "management_web": {
       "root": "apps/web/",
-      "framework": "vite"
+      "framework": "vite",
+      "rewrites": [
+        {
+          "source": "/(.*)",
+          "destination": "/index.html"
+        }
+      ]
+    },
+    "api_backend": {
+      "root": "services/api/",
+      "entrypoint": "api/index.ts"
     },
     "institutional_landing": {
       "root": "apps/landing-shippiyyukon/",
@@ -15,6 +25,27 @@
     }
   },
   "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": {
+        "service": "api_backend"
+      }
+    },
+    {
+      "source": "/(.*)",
+      "has": [
+        {
+          "type": "host",
+          "value": {
+            "pre": "shippyyukon-portal-git-feat-phase1a-auth-foundation-",
+            "suf": ".vercel.app"
+          }
+        }
+      ],
+      "destination": {
+        "service": "management_web"
+      }
+    },
     {
       "source": "/(.*)",
       "has": [

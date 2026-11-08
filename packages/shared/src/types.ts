@@ -38,7 +38,8 @@ export enum EstadoRegistro {
  * plataforma, distintos del Rol jerárquico del consejero (RolConsejero).
  */
 export enum RolPlataforma {
-  MASTER = "MASTER", // antes "Super Administrador" — acceso y gestión total
+  CTO_DEV = "CTO_DEV", // rol técnico de plataforma; permisos explícitos por acción
+  MASTER = "MASTER", // máxima gobernanza operativa; permisos definidos por acción
   COMITE_NACIONAL = "COMITE_NACIONAL", // paneles compartidos con Master; permisos por espacio delegados
   COORDINADOR_NACIONAL = "COORDINADOR_NACIONAL",
   COORDINADOR_ESTADAL = "COORDINADOR_ESTADAL",
@@ -80,4 +81,26 @@ export interface ApiResult<T> {
   ok: boolean;
   data?: T;
   error?: { code: string; message: string };
+}
+
+export type AccionPlataforma =
+  | "consejero:crear"
+  | "consejero:aprobar"
+  | "consejero:listar";
+
+export type AlcanceTerritorial =
+  | {
+      kind: "MUNICIPAL";
+      territoryId: string;
+      estado: string;
+      municipio: string;
+    }
+  | { kind: "GLOBAL" };
+
+export interface ContextoAutorizacion {
+  sub: string;
+  rolPlataforma: RolPlataforma;
+  alcanceTerritorial: AlcanceTerritorial;
+  ctoDevPosition?: "PRIMARY" | "SECONDARY";
+  permisos: AccionPlataforma[];
 }

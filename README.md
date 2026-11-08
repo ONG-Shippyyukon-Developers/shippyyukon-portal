@@ -1,74 +1,102 @@
 # Portal Red Nacional "Alianza y Fraternidad" — ONG Los Shippiyyukon
 
-Monorepo del portal de gestión y protección de datos de la Red, construido sobre
-AWS, TypeScript, React + Tailwind y Node.js serverless. Este repositorio
-implementa **Épica 0 (fundamento) + Épica A (Registro de CPNNA y
-Coordinadores)**, que es el alcance definido como "Enfoque Actual" en el
-Backlog — ver `docs/BACKLOG_MAPPING.md` para el detalle historia por historia,
-incluyendo qué queda pendiente.
+Monorepo del portal de gestión de la Red, construido con TypeScript, React,
+Tailwind CSS y Node.js. El MVP vigente utiliza **Vercel + Better Auth/Passkeys +
+Neon PostgreSQL + RBAC/alcance + RLS**.
 
-Documentos de referencia (fuera de este repo, en Claude): RawData
-Técnico-Legal, PRD, DAT y Backlog de Historias de Usuario.
+AWS/Cognito/Aurora/KMS/CDK permanece en el repositorio como arquitectura
+histórica y está congelada para esta fase. El MVP no procesa datos reales de
+niños, niñas ni adolescentes (NNA).
 
 ## Estructura
 
 ```
 apps/
-  web/                     redpanel.shippiyyukon.com — panel con RBAC
-  landing-shippiyyukon/    shippiyyukon.com — landing institucional
-  landing-red/             red.shippiyyukon.com — landing + entrada al registro
+  web/                     Panel protegido
+  landing-shippiyyukon/    Landing institucional
+  landing-red/             Landing de la Red
 services/
-  api/                     Lambdas (Node.js/TypeScript) de la Épica A
+  api/                     API Node.js/TypeScript del Módulo A
 packages/
-  shared/                  Tipos TypeScript compartidos (fuente: RawData §7)
-infrastructure/            AWS CDK (TypeScript): Cognito, Aurora, KMS, S3, API Gateway
+  shared/                  Tipos compartidos
+infrastructure/            AWS CDK histórico, no activo en el MVP
 docs/
-  BACKLOG_MAPPING.md        Mapa Backlog → código
+  BACKLOG_MAPPING.md        Mapa histórico Backlog → código
 ```
 
-## Stack
+## Estado técnico
 
-- **Frontend:** TypeScript, React 18, Vite, Tailwind CSS, React Router.
-- **Backend:** Node.js 20, TypeScript, AWS Lambda (NodejsFunction), API Gateway (HTTP API).
-- **Datos:** PostgreSQL en Amazon Aurora Serverless v2, con Row-Level Security para el aislamiento por municipio.
-- **Identidad:** Amazon Cognito con passkeys (WebAuthn/FIDO2) como autenticación para todos los roles internos.
-- **Infraestructura como código:** AWS CDK.
+- **Frontend:** TypeScript, React 18, Vite, Tailwind CSS y React Router.
+- **Backend/despliegue:** API Node.js en Vercel.
+- **Datos:** Neon PostgreSQL con migraciones versionadas y RLS.
+- **Identidad API:** verifica JWT Better Auth mediante `AUTH_URL` y
+  `AUTH_JWKS_URL` (emisor y audiencia esperados son `AUTH_URL`); solo usa
+  `sub` como identidad y no acepta roles del token. El proveedor debe habilitar
+  el plugin JWT de Better Auth y exponer claves asimétricas compatibles.
+- **Autorización API:** resuelve la asignación vigente en Neon y propaga el
+  alcance canónico por `territory_id` al contexto RLS de cada transacción.
+- **Passkeys/panel:** el login del panel todavía es un stub; la API requiere
+  que el proveedor Better Auth habilite su plugin JWT para emitir tokens
+  compatibles con la JWKS configurada.
 
-## Primeros pasos (desarrollo local)
+## Desarrollo local
+
+Requiere Node.js y una conexión **directa** a la base Neon de desarrollo para
+migraciones. Configura `DATABASE_URL_UNPOOLED` en `.env.local`; nunca guardes
+ni compartas su valor en el repositorio o el chat. La API utiliza
+`DATABASE_URL` y rechaza conexiones cuyo rol pueda omitir RLS o administrar la
+base. La credencial de migraciones no debe reutilizarse como credencial runtime.
 
 ```bash
-npm install                 # instala todo el monorepo (workspaces)
-cp .env.example .env         # y completa los valores locales
-
-# Backend: requiere un Postgres local con el esquema aplicado
-psql "$DATABASE_URL" -f services/api/src/db/schema.sql
-npm run test                 # pruebas unitarias del dominio (sin AWS)
-
-# Frontend
-npm run dev:web                      # panel de gestión → localhost:5173
-npm run dev:landing-shippiyyukon     # landing institucional
-npm run dev:landing-red              # landing de la Red
-
-# Infraestructura (requiere credenciales AWS configuradas)
-npm run infra:synth          # genera el CloudFormation sin desplegar
+npm install
+npm run db:migrate --workspace=@shippiyyukon/api
+npm run test --workspace=@shippiyyukon/api
+npm run dev:web
+npm run dev:landing-shippiyyukon
+npm run dev:landing-red
 ```
 
-## Antes de desplegar a un ambiente real
+La migración `0001` crea un catálogo territorial **mockup** (5 estados × 3
+municipios), asignaciones, delegaciones, consejeros, auditoría y políticas RLS.
+No crea usuarios ni asignaciones privilegiadas. La migración `0002` añade un
+bootstrap opcional de CTO/DEV principal, limitado al email verificado
+`CTO_DEV_BOOTSTRAP_EMAIL`, y funciones de base de datos para asignar/revocar
+solo el CTO/DEV secundario. El email se fija una sola vez al ejecutar
+migraciones con una conexión administrativa; si no se configura, el bootstrap
+permanece deshabilitado. En el primer login autenticado de esa cuenta, una
+función transaccional crea la asignación `CTO_DEV / PRIMARY / GLOBAL` y registra
+el evento de bootstrap. No se asigna el rol al primer signup arbitrario.
 
-Lee `docs/BACKLOG_MAPPING.md`, sección "Deuda técnica conocida" — en particular:
-completar la integración de passkeys en el frontend, confirmar la lista real
-de los 25 municipios piloto, y añadir CloudTrail/GuardDuty/Macie (HU-00.4,
-todavía no está en el stack de CDK).
+El rol runtime no recibe DML general sobre asignaciones: solo puede ejecutar
+esas funciones con la identidad autenticada en el contexto de la transacción.
+El modelo permite una posición PRIMARY y una SECONDARY; únicamente PRIMARY
+puede asignar o revocar SECONDARY. El CTO secundario no puede revocar al
+principal y no existe función para revocar PRIMARY.
+`shippiyyukon_runtime` es un rol de grupo sin login ni `BYPASSRLS`; aún falta
+crear/configurar el rol login de la aplicación y concederle membresía y
+permisos mínimos. Aplicar migraciones no demuestra por sí solo el aislamiento
+RLS en ejecución.
 
-La cuenta AWS se gestiona desde `shippyy.dev@gmail.com` como usuario **root**:
-actívale MFA desde el primer acceso y no la uses para el día a día — crea
-usuarios administrativos vía IAM Identity Center (ver DAT, sección de cuenta AWS).
+Para habilitar el bootstrap en un entorno autorizado, configura
+`CTO_DEV_BOOTSTRAP_EMAIL` en el entorno administrativo usado para
+`npm run db:migrate --workspace=@shippiyyukon/api`. No compartas ese valor ni
+credenciales; el migrador no sobrescribe una allowlist ya configurada.
+El flujo requiere una cuenta existente y con email verificado en Neon Auth.
+La allowlist fija la identidad elegible, pero no demuestra por sí sola que la
+cuenta se haya creado causalmente mediante una invitación.
 
-## Seguridad y datos de NNA
+## Antes de Production
 
-Este repositorio **no** procesa datos de niños, niñas ni adolescentes — el
-registro de consejeros (Épica A) solo maneja datos de los funcionarios
-públicos que integran la Red. La Épica B (autorizaciones de viaje, que sí
-procesa datos y fotografías de NNA) está deliberadamente fuera de este
-alcance hasta que Shippiyyukon confirme el modelo de consentimiento y
-verificación (RawData §12).
+Configurar y verificar el plugin JWT/Passkeys del proveedor Better Auth y su
+cliente del panel; configurar el bootstrap solo en el entorno aprobado;
+provisionar el rol runtime de mínimo privilegio; probar
+asignaciones, aislamiento cruzado y escrituras RLS con datos sintéticos y ese
+rol; completar auditoría, CI/CD, Preview y smoke tests. Los tests locales no
+sustituyen una prueba de integración contra Neon con el rol runtime. Production
+y AWS no están autorizados por el alcance de esta fase.
+
+## Privacidad
+
+La Fase 1A excluye datos reales de NNA. Los módulos que los incorporen
+requieren aprobación formal, revisión legal/privacidad, consentimiento,
+retención y controles técnicos antes de su implementación.

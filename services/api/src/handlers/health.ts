@@ -1,7 +1,16 @@
-import { APIGatewayProxyStructuredResultV2 } from "aws-lambda";
+import type { HttpRequest, HttpResponse } from "../http/types";
 import { ok } from "../utils/response";
 
-/** HU-00.4 — endpoint simple para confirmar que la Lambda y el ambiente responden. */
-export async function handler(): Promise<APIGatewayProxyStructuredResultV2> {
-  return ok({ status: "ok", service: "shippiyyukon-api", ts: new Date().toISOString() });
+/** Health endpoint independent of the runtime-specific request adapter. */
+export async function handleHealth(_request: HttpRequest): Promise<HttpResponse> {
+  return ok({
+    status: "ok",
+    service: "shippiyyukon-api",
+    ts: new Date().toISOString(),
+  });
+}
+
+/** Compatibility entry point for the existing API Gateway Lambda integration. */
+export async function handler(): Promise<HttpResponse> {
+  return handleHealth({ headers: {} });
 }

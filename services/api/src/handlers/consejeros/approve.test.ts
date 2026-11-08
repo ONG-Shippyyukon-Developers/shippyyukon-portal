@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import type { PoolClient } from "pg";
+import { RolPlataforma } from "@shippiyyukon/shared";
 
 const mocks = vi.hoisted(() => ({
   authenticate: vi.fn(),
@@ -34,8 +35,9 @@ vi.mock("../../db/client", () => ({
 import { handler } from "./approve";
 
 const usuario = {
-  sub: "usuario-prueba-001",
+  sub: "11111111-1111-4111-8111-111111111111",
   rolPlataforma: "MASTER" as never,
+  alcanceTerritorial: { kind: "GLOBAL" as const },
 };
 
 const consejeroPendiente = {
@@ -44,6 +46,7 @@ const consejeroPendiente = {
   apellidos: "Pérez",
   estado: "Anzoátegui",
   municipio: "Cantaura",
+  territorio_id: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
   genero: "F",
   estado_registro: "PENDIENTE",
 };
@@ -123,7 +126,7 @@ describe("POST /consejeros/{id}/approve", () => {
     expect(result.body.data).toEqual(actualizado);
     expect(mocks.siguienteCorrelativo).toHaveBeenCalledWith(
       expect.anything(),
-      "Cantaura"
+      "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa"
     );
 
     const selectSQL = mocks.query.mock.calls[0][0] as string;
@@ -132,6 +135,36 @@ describe("POST /consejeros/{id}/approve", () => {
     expect(selectSQL).toMatch(/FOR UPDATE/i);
     expect(updateSQL).toMatch(
       /WHERE id = \$1\s+AND estado_registro = 'PENDIENTE'/i
+    );
+  });
+
+  it("aplica el municipio asignado a CTO_DEV al contexto de aprobación", async () => {
+    const ctoDev = {
+      sub: "22222222-2222-4222-8222-222222222222",
+      rolPlataforma: RolPlataforma.CTO_DEV,
+      municipio: "Cantaura",
+      alcanceTerritorial: {
+        kind: "MUNICIPAL" as const,
+        territoryId: "aaaaaaaa-aaaa-4aaa-8aaa-aaaaaaaaaaaa",
+        estado: "Anzoátegui",
+        municipio: "Cantaura",
+      },
+    };
+    mocks.authenticate.mockResolvedValue(ctoDev);
+    mocks.query
+      .mockResolvedValueOnce({ rows: [consejeroPendiente] })
+      .mockResolvedValueOnce({
+        rows: [{ id: consejeroPendiente.id, estado_registro: "RECHAZADO" }],
+      });
+
+    await handler(evento("RECHAZADO"));
+
+    expect(mocks.withTenantContext).toHaveBeenCalledWith(
+      {
+        authenticatedUserId: ctoDev.sub,
+        alcanceTerritorial: ctoDev.alcanceTerritorial,
+      },
+      expect.any(Function)
     );
   });
 

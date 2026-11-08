@@ -4,6 +4,7 @@ import {
   SubEstadoSuplencia,
   ViaIngreso,
 } from "@shippiyyukon/shared";
+import { esRelacionTerritorialValida } from "./territorio";
 
 export class ValidationError extends Error {
   constructor(public readonly issues: string[]) {
@@ -77,6 +78,9 @@ export function validateConsejeroInput(input: ConsejeroInput): void {
   if (!input.estado?.trim()) issues.push("estado es obligatorio");
   if (!input.municipio?.trim()) {
     issues.push("municipio es obligatorio (determina el tenant — RawData Riesgo 3)");
+  }
+  if (!esRelacionTerritorialValida(input.estado, input.municipio)) {
+    issues.push("El municipio indicado no pertenece al estado seleccionado");
   }
   if (input.genero !== "M" && input.genero !== "F") {
     issues.push("genero debe ser 'M' o 'F'");
