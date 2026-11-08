@@ -1,4 +1,4 @@
-import { createRemoteJWKSet, jwtVerify, type JWTPayload } from "jose";
+import type { JWTPayload } from "jose";
 import type { AuthenticationProvider } from "./auth-boundary";
 import { AuthError } from "./auth-model";
 import type { HttpRequest } from "../http/types";
@@ -79,7 +79,7 @@ export class BetterAuthAuthenticationProvider
 {
   private readonly config?: BetterAuthConfig;
   private readonly injectedVerifier?: TokenVerifier;
-  private remoteJwks?: ReturnType<typeof createRemoteJWKSet>;
+  private remoteJwks?: ReturnType<typeof import("jose").createRemoteJWKSet>;
 
   constructor(options?: {
     config?: BetterAuthConfig;
@@ -103,7 +103,9 @@ export class BetterAuthAuthenticationProvider
       if (this.injectedVerifier) {
         payload = await this.injectedVerifier(match[1], config);
       } else {
-        const jwks = this.remoteJwks ?? createRemoteJWKSet(new URL(config.jwksUrl));
+        const { createRemoteJWKSet, jwtVerify } = await import("jose");
+        const jwks =
+          this.remoteJwks ?? createRemoteJWKSet(new URL(config.jwksUrl));
         this.remoteJwks = jwks;
         ({ payload } = await jwtVerify(match[1], jwks, {
           issuer: getIssuer(config),
