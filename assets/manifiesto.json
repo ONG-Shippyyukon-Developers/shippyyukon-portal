@@ -1,0 +1,256 @@
+[
+  {
+    "codigo": "SH-01",
+    "tipo": "logo",
+    "descripcion": "Logo completo horizontal (isotipo + nombre)",
+    "svg": "svg/logo/shippiyyukon-logo-horizontal.svg",
+    "png": [
+      "png/logo/shippiyyukon-logo-horizontal-320w.png",
+      "png/logo/shippiyyukon-logo-horizontal-640w.png",
+      "png/logo/shippiyyukon-logo-horizontal-1280w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "42334d6081cd4ef3ba275ef7fd031695f190dfbae6ddf4d3425aa084ca3dbb54"
+  },
+  {
+    "codigo": "SH-09",
+    "tipo": "logo",
+    "descripcion": "Logo vertical (isotipo arriba, nombre abajo)",
+    "svg": "svg/logo/shippiyyukon-logo-vertical.svg",
+    "png": [
+      "png/logo/shippiyyukon-logo-vertical-256w.png",
+      "png/logo/shippiyyukon-logo-vertical-512w.png",
+      "png/logo/shippiyyukon-logo-vertical-1024w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "aa06866e4c673dce4828d4bd2a6707180d8c27ed03327bc8cfdc53fb3ebf9c94"
+  },
+  {
+    "codigo": "SH-03",
+    "tipo": "isotipo",
+    "descripcion": "Isotipo a color",
+    "svg": "svg/isotipo/shippiyyukon-isotipo-color.svg",
+    "png": [
+      "png/isotipo/shippiyyukon-isotipo-color-128w.png",
+      "png/isotipo/shippiyyukon-isotipo-color-256w.png",
+      "png/isotipo/shippiyyukon-isotipo-color-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "3e5b7a67c1c38f3c70c0bb11e5ee804a23b74466d940e5e1958135d2a06866d0"
+  },
+  {
+    "codigo": "SH-04",
+    "tipo": "isotipo",
+    "descripcion": "Isotipo a color con estrella chica",
+    "svg": "svg/isotipo/shippiyyukon-isotipo-estrella-chica.svg",
+    "png": [
+      "png/isotipo/shippiyyukon-isotipo-estrella-chica-128w.png",
+      "png/isotipo/shippiyyukon-isotipo-estrella-chica-256w.png",
+      "png/isotipo/shippiyyukon-isotipo-estrella-chica-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "e55a51f32fb1075909a6d35ef8b2e6bf6d3ac57c34e2946cde7fb2360157c86e"
+  },
+  {
+    "codigo": "SH-05",
+    "tipo": "isotipo",
+    "descripcion": "Isotipo en negro, dos tonos",
+    "svg": "svg/isotipo/shippiyyukon-isotipo-negro.svg",
+    "png": [
+      "png/isotipo/shippiyyukon-isotipo-negro-128w.png",
+      "png/isotipo/shippiyyukon-isotipo-negro-256w.png",
+      "png/isotipo/shippiyyukon-isotipo-negro-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "9c9b09e4d0d8d471f7243f376c7c14a77cfb2b9ec865cb9b2a8d64daf562a050"
+  },
+  {
+    "codigo": "SH-06",
+    "tipo": "isotipo",
+    "descripcion": "Isotipo a una tinta (sellos, fotocopias)",
+    "svg": "svg/isotipo/shippiyyukon-isotipo-una-tinta.svg",
+    "png": [
+      "png/isotipo/shippiyyukon-isotipo-una-tinta-128w.png",
+      "png/isotipo/shippiyyukon-isotipo-una-tinta-256w.png",
+      "png/isotipo/shippiyyukon-isotipo-una-tinta-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "d2561b04bc6f68586170930fca6cfa622eca451459a6e00fb52ac06ec38d0474"
+  },
+  {
+    "codigo": "SH-08",
+    "tipo": "wordmark",
+    "descripcion": "Solo el nombre",
+    "svg": "svg/wordmark/shippiyyukon-nombre.svg",
+    "png": [
+      "png/wordmark/shippiyyukon-nombre-256w.png",
+      "png/wordmark/shippiyyukon-nombre-512w.png",
+      "png/wordmark/shippiyyukon-nombre-1024w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "edec2d1c87f1c19059c379a65f82126016c067a50b7648d7c576f672b1197533"
+  },
+  {
+    "codigo": "SH-02",
+    "tipo": "frase",
+    "descripcion": "Frase «Juntos por la niñez y la adolescencia»",
+    "svg": "svg/frase/shippiyyukon-frase-juntos.svg",
+    "png": [
+      "png/frase/shippiyyukon-frase-juntos-256w.png",
+      "png/frase/shippiyyukon-frase-juntos-512w.png",
+      "png/frase/shippiyyukon-frase-juntos-1024w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "5e9203b1699d87c91b480d759a512cf5e1064eea1bb808a7c00e3dfb80ab77e2"
+  },
+  {
+    "codigo": "SH-07",
+    "tipo": "icono-app",
+    "descripcion": "Ícono de app (cuadro rojo redondeado)",
+    "svg": "svg/icono-app/shippiyyukon-icono-app.svg",
+    "png": [
+      "png/icono-app/shippiyyukon-icono-app-192w.png",
+      "png/icono-app/shippiyyukon-icono-app-512w.png",
+      "png/icono-app/shippiyyukon-icono-app-1024w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "32b073c8592e6f1bc554e7c98f7624f2cccfff62cae59a0c1fd54a41c5be1f30"
+  },
+  {
+    "codigo": "SH-10",
+    "tipo": "favicon",
+    "descripcion": "Favicon para 512 px y más",
+    "svg": "svg/favicon/favicon-grande.svg",
+    "png": [
+      "png/favicon/favicon-grande-512w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "ae2bb4e2a06111d8fc269c28dd0cc32ba6bab21bbfa0b65d1fc4fcbe44a32847"
+  },
+  {
+    "codigo": "SH-11",
+    "tipo": "favicon",
+    "descripcion": "Favicon de 64 a 180 px",
+    "svg": "svg/favicon/favicon-mediano.svg",
+    "png": [
+      "png/favicon/favicon-mediano-64w.png",
+      "png/favicon/favicon-mediano-180w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "7bed7b9cdfeedb100f662249e582e5d9c544a9f0de8bdb27249074c28ef6fcf3"
+  },
+  {
+    "codigo": "SH-12",
+    "tipo": "favicon",
+    "descripcion": "Favicon de 32 a 48 px",
+    "svg": "svg/favicon/favicon-pequeno.svg",
+    "png": [
+      "png/favicon/favicon-pequeno-32w.png",
+      "png/favicon/favicon-pequeno-48w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "20bd3df6322b089ff7d65bf3e71e386ef8ffd43ec5740ce9a52df1e5f29eb061"
+  },
+  {
+    "codigo": "SH-13",
+    "tipo": "favicon",
+    "descripcion": "Favicon de 16 px",
+    "svg": "svg/favicon/favicon-minimo.svg",
+    "png": [
+      "png/favicon/favicon-minimo-16w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "6bb6ee6da559d637fb3f2a26bdc1158791bd79321e64c9aba16e57e74fdcfcd5"
+  },
+  {
+    "codigo": "RP-01",
+    "tipo": "logo",
+    "descripcion": "RedPanel: logo completo horizontal",
+    "svg": "svg/logo/redpanel-logo-horizontal.svg",
+    "png": [
+      "png/logo/redpanel-logo-horizontal-320w.png",
+      "png/logo/redpanel-logo-horizontal-640w.png",
+      "png/logo/redpanel-logo-horizontal-1280w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "db90358b562a145c7afb4e03f7d194c0f0af1a8ff8ce1506b785dd2cbe25fe2c"
+  },
+  {
+    "codigo": "RP-02",
+    "tipo": "isotipo",
+    "descripcion": "RedPanel: isotipo a color",
+    "svg": "svg/isotipo/redpanel-isotipo-color.svg",
+    "png": [
+      "png/isotipo/redpanel-isotipo-color-128w.png",
+      "png/isotipo/redpanel-isotipo-color-256w.png",
+      "png/isotipo/redpanel-isotipo-color-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "accf22b07d626cb869161fda8e11a47f7b8503a906b013d3d06d4c3a8265ca30"
+  },
+  {
+    "codigo": "RP-03",
+    "tipo": "isotipo",
+    "descripcion": "RedPanel: isotipo de línea",
+    "svg": "svg/isotipo/redpanel-isotipo-linea.svg",
+    "png": [
+      "png/isotipo/redpanel-isotipo-linea-128w.png",
+      "png/isotipo/redpanel-isotipo-linea-256w.png",
+      "png/isotipo/redpanel-isotipo-linea-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "7bc6ba683bce2b179c78d6ae4f730ba5e5631cdc02b5e7266d0e72fee32fe729"
+  },
+  {
+    "codigo": "RP-04",
+    "tipo": "isotipo",
+    "descripcion": "RedPanel: isotipo de línea, variante",
+    "svg": "svg/isotipo/redpanel-isotipo-linea-variante.svg",
+    "png": [
+      "png/isotipo/redpanel-isotipo-linea-variante-128w.png",
+      "png/isotipo/redpanel-isotipo-linea-variante-256w.png",
+      "png/isotipo/redpanel-isotipo-linea-variante-512w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "fdc2d0989c998aeed7dff8e43a8220fd48e89eaf3e840f216c93649e704017cb"
+  },
+  {
+    "codigo": "RP-05",
+    "tipo": "icono-app",
+    "descripcion": "RedPanel: ícono de app (cuadro marino)",
+    "svg": "svg/icono-app/redpanel-icono-app.svg",
+    "png": [
+      "png/icono-app/redpanel-icono-app-192w.png",
+      "png/icono-app/redpanel-icono-app-512w.png",
+      "png/icono-app/redpanel-icono-app-1024w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "2308293a251fdd7d2ba18495145d1583355967507a35bd1aa088c8865b3b998f"
+  },
+  {
+    "codigo": "RP-06",
+    "tipo": "wordmark",
+    "descripcion": "RedPanel: solo el nombre",
+    "svg": "svg/wordmark/redpanel-nombre.svg",
+    "png": [
+      "png/wordmark/redpanel-nombre-256w.png",
+      "png/wordmark/redpanel-nombre-512w.png",
+      "png/wordmark/redpanel-nombre-1024w.png"
+    ],
+    "fondo_transparente": true,
+    "sha256_svg": "5d664766b7a868f5450b7d542f46df1173675887a47583fc62f50ee2174aec4d"
+  },
+  {
+    "codigo": "RP-07",
+    "tipo": "favicon",
+    "descripcion": "RedPanel: favicon (cuadro rojo)",
+    "svg": "svg/favicon/redpanel-favicon.svg",
+    "png": [
+      "png/favicon/redpanel-favicon-32w.png",
+      "png/favicon/redpanel-favicon-180w.png",
+      "png/favicon/redpanel-favicon-512w.png"
+    ],
+    "fondo_transparente": false,
+    "sha256_svg": "79f66fa4dd189bd00e02257b652f0e134151b7ecdae774a797bd7d4839b6ebc7"
+  }
+]
